@@ -6,7 +6,8 @@
 #include "visiblerect.h"
 #include "ui/CocosGUI.h"
 #include "editor-support/cocostudio/CocoStudio.h"
-#include "Player.h"
+
+#include "UserPlayer.h"
 
 typedef cocos2d::ui::Button Button;
 typedef cocos2d::ui::Widget Widget;
@@ -22,7 +23,7 @@ public:
 	void SetGameLayer(HelloWorld * layer){
 		m_gameLayer = layer;
 	}
-	void SetPlayer(Player * player){
+	void SetPlayer(UserPlayer * player){
 		m_player = player;
 	}
 public:
@@ -32,11 +33,12 @@ public:
 	void leftJumpTouchEvent(Ref *pSender, Widget::TouchEventType type);
 	void rightJumpTouchEvent(Ref *pSender, Widget::TouchEventType type);
 	void attackTouchEvent(Ref *pSender, Widget::TouchEventType type);
+	void testTouchEvent(Ref *pSender, Widget::TouchEventType type);
 private:
-	void endPlayerAttack(float dt);
+	//void endPlayerAttack(float dt);
 private:
 	HelloWorld * m_gameLayer;
-	Player * m_player;
+	UserPlayer * m_player;
 	
 };
 #endif

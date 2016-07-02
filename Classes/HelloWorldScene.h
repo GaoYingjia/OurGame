@@ -6,8 +6,9 @@
 //#include "extensions/cocos-ext.h"
 #include "visiblerect.h"
 #include "testresource.h"
-#include "Player.h"
+
 #include "ControlUI.h"
+#include "UserPlayer.h"
 
 #if CC_USE_PHYSICS
 
@@ -32,34 +33,44 @@ public:
 	void InitLayer();
 	void updateOnceTestScene(float delta);
 	bool onContactBegin(cocos2d::PhysicsContact& contact);
+	bool onContactPreSolve(cocos2d::PhysicsContact& contact);
+	bool onContactPostSolve(cocos2d::PhysicsContact& contact);
+
 	void toggleDebugCallback(cocos2d::Ref* sender);
 	void onClickTest(Ref* sender);
 
-	void startMovePlayer();
-	void endMovePlayer();
-	void movePlayer(float dt);
+	/*void startMovePlayer();
+	void endMovePlayer();*/
+	/*void movePlayer(float dt);*/
     // implement the "static create()" method manually
 	
-	void attackEnd();
+	/*void attackEnd();*/
 
-	Player * getPlayerPtr(){
-		return m_player;
+	UserPlayer * getPlayerPtr(){
+		return m_userPlayer;
 	}
 	
 	void focusOnPlayer();
-	void stopFocusOnPlayer();
+	//void stopFocusOnPlayer();
 
 	void followPlayer(float dt);
     CREATE_FUNC(HelloWorld);
+
+	bool isFocus(){
+		return m_focusOn;
+	}
 private:
-	cocos2d::ParallaxNode* m_parNode;
+	//cocos2d::ParallaxNode* m_parNode;
 	std::unordered_map<int, cocos2d::Node*> _mouses;
 	int	m_contactCount;
 
 	float m_scale;
-	Player * m_player;
+	UserPlayer * m_userPlayer;
 	cocos2d::Label* m_label;
+	cocos2d::Label* m_labelState;
+	cocos2d::Label* m_focusState;
 	bool m_debugDraw;
+	bool m_focusOn;
 	//cocos2d::Sprite* m_sp;
 };
 #endif

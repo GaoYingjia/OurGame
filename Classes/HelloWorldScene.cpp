@@ -93,18 +93,18 @@ bool HelloWorld::init()
 	scheduleOnce(CC_SCHEDULE_SELECTOR(HelloWorld::updateOnceTestScene), 1.0);
     return true;
 }
-void  HelloWorld::movePlayer(float dt){
-	//Player::Instance()->Move();
-
-	//if (m_scale < 2.0){
-	//	this->setScale(m_scale);
-	//	m_scale += 0.01;
-	//}
-
-	m_player -> Move();
-	Vec2 pos = m_player->returnSprite()->getPosition();
-	this->setPosition(-pos.x + VisibleRect::center().x, -pos.y + VisibleRect::center().y-100);
-}
+//void  HelloWorld::movePlayer(float dt){
+//	//Player::Instance()->Move();
+//
+//	//if (m_scale < 2.0){
+//	//	this->setScale(m_scale);
+//	//	m_scale += 0.01;
+//	//}
+//
+//	m_userPlayer -> Move();
+//	Vec2 pos = m_userPlayer->getPosition();
+//	this->setPosition(-pos.x + VisibleRect::center().x, -pos.y + VisibleRect::center().y-100);
+//}
 cocos2d::Sprite* HelloWorld::addGrossiniAtPosition(cocos2d::Vec2 p, float scale/* = 1.0*/){
 	//int posx, posy;
 
@@ -127,7 +127,7 @@ cocos2d::Sprite* HelloWorld::addGrossiniAtPosition(cocos2d::Vec2 p, float scale/
 }
 void  HelloWorld::updateOnceTestScene(float delta){
 	/*m_parNode=ParallaxNode::create();*/
-	this->getScene()->getPhysicsWorld()->setGravity(Vec2(0, -500));
+	this->getScene()->getPhysicsWorld()->setGravity(Vec2(0, -750));
 	//m_label->setString("xixixi");
 	m_contactCount++;
 	char buffer[10];
@@ -135,21 +135,21 @@ void  HelloWorld::updateOnceTestScene(float delta){
 	m_label->setString(buffer);
 	//Player::Instance()->
 	
-	//m_player->Jump();
+	//m_userPlayer->Jump();
 	//schedule(CC_SCHEDULE_SELECTOR(HelloWorld::movePlayer), 0.07f);
 	/*auto hero=this->getChildByTag(99);
 	hero->getPhysicsBody()->setVelocity(Vec2(50,350));*/
 }
-void HelloWorld::startMovePlayer(){
-	//m_player->Attack();
-	m_player->playerMove();
-	//schedule(CC_SCHEDULE_SELECTOR(HelloWorld::movePlayer), 0.01f);
-}
-void HelloWorld::endMovePlayer(){
-	m_player->endMove();
-	//m_player->AttackEnd();
-	//unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::movePlayer));
-}
+//void HelloWorld::startMovePlayer(){
+//	//m_userPlayer->Attack();
+//	m_userPlayer->playerMove();
+//	//schedule(CC_SCHEDULE_SELECTOR(HelloWorld::movePlayer), 0.01f);
+//}
+//void HelloWorld::endMovePlayer(){
+//	m_userPlayer->endMove();
+//	//m_userPlayer->AttackEnd();
+//	//unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::movePlayer));
+//}
 void HelloWorld::onClickTest(Ref* sender){
 	m_contactCount++;
 	char buffer[10];
@@ -167,16 +167,27 @@ void HelloWorld::toggleDebugCallback(cocos2d::Ref* sender){
 bool HelloWorld::onContactBegin(cocos2d::PhysicsContact& contact){
 	//PhysicsBody* a = contact.getShapeA()->getBody();
 	//PhysicsBody* b = contact.getShapeB()->getBody();
-	m_contactCount++;
+	/*m_contactCount++;*/
 	char buffer[10];
-	sprintf(buffer, "%d", m_contactCount);
+	sprintf(buffer, "beg");
 	m_label->setString(buffer);
-
-	PhysicsBody* a = contact.getShapeA()->getBody();
+	/*if (m_userPlayer->getRunState()){
+		m_userPlayer->getPhysicsBody()->setVelocity(Vec2(0.0, 0.0));
+		m_userPlayer->setRunState(false);
+	}*/
+	//m_userPlayer->getPhysicsBody()->setDynamic(false);
+	if (m_userPlayer->getPlayerState() == UserPlayer::kJump){
+		m_userPlayer->setPlayerState(UserPlayer::kStatic);
+		m_userPlayer->getPhysicsBody()->setVelocity(Vec2(0.0, 0.0));
+		//m_userPlayer->setRunState(false);
+	}
+	/*PhysicsBody* a = contact.getShapeA()->getBody();
 	PhysicsBody* b = contact.getShapeB()->getBody();
 
-	a->setVelocity(Vec2(0.0, 0.0));
-	b->setVelocity(Vec2(0.0, 0.0));
+	if (a->getTag() == 128)
+		a->setVelocity(Vec2(0.0, 0.0));
+	else
+		b->setVelocity(Vec2(0.0, 0.0));*/
 	/*a->setResting(true);
 	b->setResting(true);*/
 	/*a->resetForces();
@@ -194,6 +205,7 @@ bool HelloWorld::onContactBegin(cocos2d::PhysicsContact& contact){
 void  HelloWorld::InitLayer(){
 	//HelloWorld::scene()->getPhysicsWorld()->setGravity(Vec2(0, 99));
 	
+	m_focusOn = false;
 	m_debugDraw = false;
 	m_contactCount = 0;
 	m_scale = 0.5;
@@ -202,8 +214,18 @@ void  HelloWorld::InitLayer(){
 	sprintf(buffer, "%d", m_contactCount);
 	m_label = Label::createWithTTF(buffer, "fonts/arial.ttf", 32);
 	addChild(m_label, 1);
+
+	
 	auto s = VisibleRect::getVisibleRect().size;
 	m_label->setPosition(Vec2(s.width / 2, s.height - 50));
+
+	m_labelState = Label::createWithTTF("test", "fonts/arial.ttf", 32);
+	m_labelState->setPosition(Vec2(s.width / 2, s.height - 100));
+	addChild(m_labelState, 1);
+
+	m_focusState = Label::createWithTTF("unFocus", "fonts/arial.ttf", 32);
+	m_focusState->setPosition(Vec2(s.width / 2, s.height - 150));
+	addChild(m_focusState, 1);
 	//m_label->setString()
 
 	//toggle click
@@ -229,10 +251,10 @@ void  HelloWorld::InitLayer(){
 
 
 	//back ground
-	m_parNode = ParallaxNode::create();
-	//m_sp = cocos2d::Sprite::create();
-		 
-	addChild(m_parNode);
+	//m_parNode = ParallaxNode::create();
+	////m_sp = cocos2d::Sprite::create();
+	//	 
+	//addChild(m_parNode);
 	//addChild(m_sp);
 
 	auto touchListener = EventListenerTouchOneByOne::create();
@@ -247,11 +269,12 @@ void  HelloWorld::InitLayer(){
 	auto node = Node::create();
 	node->addComponent(PhysicsBody::createEdgeSegment(VisibleRect::leftBottom() + Vec2(0, 50),
 		VisibleRect::rightBottom() + Vec2(0, 50)));
-	auto edgeShape = PhysicsShapeEdgeSegment::create(VisibleRect::leftBottom() + Vec2(0, 50),
+	/*auto edgeShape = PhysicsShapeEdgeSegment::create(VisibleRect::leftBottom() + Vec2(0, 50),
 		VisibleRect::rightBottom() + Vec2(0, 50));
-	node->getPhysicsBody()->addShape(edgeShape);
+	node->getPhysicsBody()->addShape(edgeShape);*/
 	//node->getPhysicsBody()->
-	node->getPhysicsBody()->getShape(0)->setFriction(99999);
+	node->getPhysicsBody()->getShape(0)->setRestitution(99);
+	//node->getPhysicsBody()->getShape(0)->setFriction(99999);
 	node->getPhysicsBody()->getShape(0)->setCategoryBitmask(0x0001);    // 0100
 	node->getPhysicsBody()->getShape(0)->setContactTestBitmask(0x0001); // 0001
 	node->getPhysicsBody()->getShape(0)->setCollisionBitmask(0x0001);   // 0110
@@ -265,43 +288,34 @@ void  HelloWorld::InitLayer(){
 	//node->drawSegment(VisibleRect::leftBottom() + Vec2(0, 50), VisibleRect::rightBottom() + Vec2(0, 50), 1, STATIC_COLOR);
 
 
-	//add Player
+	
 
-	m_player = Player::create();
-	addChild(m_player->returnSprite());
-
+	//Player *m_userPlayer1 = Player::create();
+	////m_userPlayer1->setPosition(VisibleRect::bottom() + Vec2((13 / 2 - 13) * 11, (14 - 13) * 23 + 55));
+	//addChild(m_userPlayer1);
 	//add man///////////////
 
+	//add user
+	m_userPlayer = UserPlayer::create("Images/grossini.png");
+	m_userPlayer->personalized(VisibleRect::bottom() + Vec2((13 / 2 - 5) * 11, (14 - 13) * 5 + 100), 0.5f);
+	addChild(m_userPlayer);
+	m_userPlayer->setTag(99);
+	m_userPlayer->getPhysicsBody()->setTag(DRAG_BODYS_TAG);
 
-	StagePropertyBase *m_sp = StagePropertyBase::create("Images/grossini.png");
+	//thing test
+	/*StagePropertyBase *m_sp = StagePropertyBase::create("Images/grossini.png");
 	m_sp->personalized(VisibleRect::bottom() + Vec2((13 / 2 - 13) * 11, (14 - 13) * 23+55), 0.5f);
 	addChild(m_sp);
 	m_sp->setTag(99);
 	m_sp->getPhysicsBody()->setTag(DRAG_BODYS_TAG);
-	/*auto m_sp = addGrossiniAtPosition(VisibleRect::bottom() + Vec2((13 / 2 - 13) * 11, (14 - 13) * 23 + 100), 0.5f);
-	m_sp->setTag(99);
-	m_sp->getPhysicsBody()->setTag(DRAG_BODYS_TAG);
-	m_sp->getPhysicsBody()->setRotationEnable(false);
-	m_sp->getPhysicsBody()->setDynamic(false);
-	m_sp->getPhysicsBody()->getShape(0)->setFriction(30);
-	m_sp->getPhysicsBody()->getShape(0)->setRestitution(0.0);
-	m_sp->getPhysicsBody()->getShape(0)->setCategoryBitmask(0x0001);
-	m_sp->getPhysicsBody()->getShape(0)->setContactTestBitmask(0x0001);
-	m_sp->getPhysicsBody()->getShape(0)->setCollisionBitmask(0x0001);
-	m_sp->getPhysicsBody()->setContactTestBitmask(0x03);*/
-
-	//auto m_sp2 = addGrossiniAtPosition(VisibleRect::bottom() + Vec2((13 / 2 -1) * 11, (14 - 1) * 23 + 100), 0.5f);
-	//m_sp2->getPhysicsBody()->setTag(DRAG_BODYS_TAG);
-	//m_sp2->getPhysicsBody()->setRotationEnable(false);
-	//m_sp2->getPhysicsBody()->setDynamic(true);
-	//m_sp2->getPhysicsBody()->setCategoryBitmask(0x01);
-	//m_sp2->getPhysicsBody()->setContactTestBitmask(0x04);
-	//m_sp2->getPhysicsBody()->setCollisionBitmask(0x03);
-
-	auto contactListener = EventListenerPhysicsContact::create();
-	contactListener->onContactBegin = CC_CALLBACK_1(HelloWorld::onContactBegin, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
-
+*/
+	auto contactListener2 = EventListenerPhysicsContactWithBodies::create(node->getPhysicsBody(), m_userPlayer->getPhysicsBody());
+	//auto contactListener = EventListenerPhysicsContact::create();
+	//contactListener->onContactBegin = CC_CALLBACK_1(HelloWorld::onContactBegin, this);
+	contactListener2->onContactBegin = CC_CALLBACK_1(HelloWorld::onContactBegin, this);
+	contactListener2->onContactPreSolve = CC_CALLBACK_1(HelloWorld::onContactPreSolve, this);
+	//_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener2, this);
 	///////////////////////////////////////////////
 	/*PhysicsBody* box = PhysicsBody::create();
 	box->setRotationEnable(false);
@@ -314,19 +328,19 @@ void  HelloWorld::InitLayer(){
 	/*HelloWorld::scene()->getPhysicsWorld()->*/
 }
 void HelloWorld::loadBackGround(){
-	auto background = Sprite::create(s_back);
-	// scale the image (optional)
-	background->setScale(1.5f);
-	// change the transform anchor point (optional)
-	background->setAnchorPoint(Vec2(0, 0));
+	//auto background = Sprite::create(s_back);
+	//// scale the image (optional)
+	//background->setScale(1.5f);
+	//// change the transform anchor point (optional)
+	//background->setAnchorPoint(Vec2(0, 0));
 
-	/*auto voidNode = ParallaxNode::create();*/
-	m_parNode->addChild(background, -1, Vec2(0.4f, 0.5f), Vec2::ZERO);
-	//addChild(voidNode);
+	///*auto voidNode = ParallaxNode::create();*/
+	//m_parNode->addChild(background, -1, Vec2(0.4f, 0.5f), Vec2::ZERO);
+	////addChild(voidNode);
 }
-void HelloWorld ::attackEnd(){
-	m_player->AttackEnd();
-}
+//void HelloWorld ::attackEnd(){
+//	m_userPlayer->AttackEnd();
+//}
 void HelloWorld::menuCloseCallback(Ref* sender)
 {
     Director::getInstance()->end();
@@ -390,20 +404,85 @@ void HelloWorld::onTouchEnded(Touch* touch, Event* event)
 	}
 }
 void HelloWorld::focusOnPlayer(){
+	m_focusOn = true;
 	schedule(CC_SCHEDULE_SELECTOR(HelloWorld::followPlayer), 0.01f);
 }
-void HelloWorld::stopFocusOnPlayer(){
-	unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::followPlayer));
-}
+//void HelloWorld::stopFocusOnPlayer(){
+//	unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::followPlayer));
+//}
 void HelloWorld::followPlayer(float dt){
-	Vec2 pos = m_player->returnSprite()->getPosition();
+	//double test = m_contactCount
+	m_contactCount++;
+	Vec2 pos = m_userPlayer->getPosition();
 	this->setPosition(-pos.x + VisibleRect::center().x, -pos.y + VisibleRect::center().y - 100);
-	Vec2 vel = m_player->returnSprite()->getPhysicsBody()->getVelocity();
-	if (vel.x == 0.0&&vel.y == 0.0){
-		m_contactCount++;
-		char buffer[10];
-		sprintf(buffer, "endtest%d", m_contactCount);
-		m_label->setString(buffer);
-		unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::followPlayer));
+	//this->setPosition(-pos.x + m_contactCount, -pos.y + VisibleRect::center().y - 100);
+	//Vec2 vel = m_userPlayer->getPhysicsBody()->getVelocity();
+
+	if (m_focusOn){
+		m_focusState->setString("focusOn");
 	}
+	else{
+		m_focusState->setString("unFocus");
+	}
+
+	if (m_userPlayer->getPlayerState() == UserPlayer::kStatic){
+		m_contactCount++;
+		/*char buffer[10];
+		sprintf(buffer, "endtest%d", m_contactCount);
+		m_label->setString(buffer);*/
+		unschedule(CC_SCHEDULE_SELECTOR(HelloWorld::followPlayer));
+		m_focusOn = false;
+		m_focusState->setString("unFocus");
+	}
+	
+	if (m_userPlayer->getPlayerState() == UserPlayer::kStatic){
+		char buffer[10];
+		sprintf(buffer, "static");
+		m_labelState->setString(buffer);
+	}
+	else if (m_userPlayer->getPlayerState() == UserPlayer::kJump){
+		char buffer[10];
+		sprintf(buffer, "jump");
+		m_labelState->setString(buffer);
+	}
+	else if (m_userPlayer->getPlayerState() == UserPlayer::kMove){
+		char buffer[10];
+		sprintf(buffer, "move");
+		m_labelState->setString(buffer);
+	}
+	else{
+		char buffer[10];
+		sprintf(buffer, "undifine");
+		m_labelState->setString(buffer);
+	}
+}
+bool HelloWorld::onContactPreSolve(cocos2d::PhysicsContact& contact){
+	//m_contactCount++;
+	char buffer[10];
+	sprintf(buffer, "%d",99);
+	m_label->setString(buffer);
+
+	//solve.ignore();
+	m_userPlayer->getPhysicsBody()->setVelocity(Vec2(0.0, 0.0));
+	if (m_userPlayer->getPlayerState() == UserPlayer::kJump){
+		m_userPlayer->setPlayerState(UserPlayer::kStatic);
+		m_userPlayer->getPhysicsBody()->setVelocity(Vec2(0.0, 0.0));
+		//m_userPlayer->setRunState(false);
+	}
+	//if (m_userPlayer->getPlayerState() == UserPlayer::kJump)
+	//PhysicsContactPreSolve::ignore();
+	
+	return true;
+}
+bool HelloWorld::onContactPostSolve(cocos2d::PhysicsContact& contact){
+	//m_contactCount++;
+	char buffer[10];
+	sprintf(buffer, "%d",11);
+	m_label->setString(buffer);
+
+	m_userPlayer->getPhysicsBody()->setVelocity(Vec2(0.0, 0.0));
+	
+
+
+	return true;
 }

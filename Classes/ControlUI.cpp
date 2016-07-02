@@ -82,6 +82,7 @@ bool ControlUI::init(){
 	button_test->setPosition(button_attack->getPosition() + Vec2(0, 35));
 	//button->setZoomScale(0.4f);
 	button_test->setPressedActionEnabled(true);
+	button_test->addTouchEventListener(CC_CALLBACK_2(ControlUI::testTouchEvent, this));
 	this->addChild(button_test);
 
 	//Button
@@ -105,7 +106,7 @@ void ControlUI::touchEvent(Ref *pSender, Widget::TouchEventType type)
 	switch (type)
 	{
 	case Widget::TouchEventType::BEGAN:
-		m_gameLayer->startMovePlayer();
+		//m_gameLayer->startMovePlayer();
 		break;
 
 	case Widget::TouchEventType::MOVED:
@@ -114,7 +115,7 @@ void ControlUI::touchEvent(Ref *pSender, Widget::TouchEventType type)
 
 	case Widget::TouchEventType::ENDED:
 		//_displayValueLabel->setString("Touch Ended");
-		m_gameLayer->endMovePlayer();
+		//m_gameLayer->endMovePlayer();
 		break;
 
 	case Widget::TouchEventType::CANCELED:
@@ -131,9 +132,10 @@ void ControlUI::leftWalkTouchEvent(Ref *pSender, Widget::TouchEventType type)
 	switch (type)
 	{
 	case Widget::TouchEventType::BEGAN:
-		m_player->SetDirection(Player::kLeft);
+		m_player->SetDirection(UserPlayer::kLeft);
 		m_player->Move();
-		m_gameLayer->focusOnPlayer();
+		if (!m_gameLayer->isFocus())
+			m_gameLayer->focusOnPlayer();
 		//m_gameLayer->startMovePlayer();
 		break;
 	case Widget::TouchEventType::MOVED:
@@ -141,7 +143,7 @@ void ControlUI::leftWalkTouchEvent(Ref *pSender, Widget::TouchEventType type)
 
 	case Widget::TouchEventType::ENDED:
 		m_player->endMove();
-		m_gameLayer->stopFocusOnPlayer();
+		//m_gameLayer->stopFocusOnPlayer();
 		break;
 
 	case Widget::TouchEventType::CANCELED:
@@ -156,16 +158,17 @@ void ControlUI::rightWalkTouchEvent(Ref *pSender, Widget::TouchEventType type)
 	switch (type)
 	{
 	case Widget::TouchEventType::BEGAN:	
-		m_player->SetDirection(Player::kRight);
+		m_player->SetDirection(UserPlayer::kRight);
 		m_player->Move();
-		m_gameLayer->focusOnPlayer();
+		if (!m_gameLayer->isFocus())
+			m_gameLayer->focusOnPlayer();
 		//m_gameLayer->startMovePlayer();
 		break;
 	case Widget::TouchEventType::MOVED:
 		break;
 	case Widget::TouchEventType::ENDED:
-		m_gameLayer->stopFocusOnPlayer();
 		m_player->endMove();
+		//m_gameLayer->stopFocusOnPlayer();	
 		break;
 
 	case Widget::TouchEventType::CANCELED:
@@ -179,10 +182,11 @@ void ControlUI::leftJumpTouchEvent(Ref *pSender, Widget::TouchEventType type)
 {
 	switch (type)
 	{
-	case Widget::TouchEventType::BEGAN:
-		m_gameLayer->focusOnPlayer();
-		m_player->SetDirection(Player::kLeft);
+	case Widget::TouchEventType::BEGAN:		
+		m_player->SetDirection(UserPlayer::kLeft);
 		m_player->Jump();
+		if (!m_gameLayer->isFocus())
+			m_gameLayer->focusOnPlayer();
 		//m_gameLayer->startMovePlayer();
 		break;
 	case Widget::TouchEventType::MOVED:
@@ -202,10 +206,11 @@ void ControlUI::rightJumpTouchEvent(Ref *pSender, Widget::TouchEventType type)
 {
 	switch (type)
 	{
-	case Widget::TouchEventType::BEGAN:
-		m_gameLayer->focusOnPlayer();
-		m_player->SetDirection(Player::kRight);
+	case Widget::TouchEventType::BEGAN:	
+		m_player->SetDirection(UserPlayer::kRight);
 		m_player->Jump();
+		if (!m_gameLayer->isFocus())
+			m_gameLayer->focusOnPlayer();
 		//m_gameLayer->startMovePlayer();
 		break;
 	case Widget::TouchEventType::MOVED:
@@ -225,9 +230,9 @@ void ControlUI::attackTouchEvent(Ref *pSender, Widget::TouchEventType type)
 	switch (type)
 	{
 	case Widget::TouchEventType::BEGAN:
-		m_player->SetDirection(Player::kRight);
+		m_player->SetDirection(UserPlayer::kRight);
 		m_player->Attack();
-		scheduleOnce(schedule_selector(ControlUI::endPlayerAttack), 0.2f);
+		//scheduleOnce(schedule_selector(ControlUI::endPlayerAttack), 0.2f);
 		//m_gameLayer->startMovePlayer();
 		break;
 	case Widget::TouchEventType::MOVED:
@@ -241,6 +246,30 @@ void ControlUI::attackTouchEvent(Ref *pSender, Widget::TouchEventType type)
 		break;
 	}
 }
-void ControlUI::endPlayerAttack(float dt){
-	m_player->AttackEnd();
+//void ControlUI::endPlayerAttack(float dt){
+//	m_player->AttackEnd();
+//}
+void ControlUI::testTouchEvent(Ref *pSender, Widget::TouchEventType type)
+{
+	switch (type)
+	{
+	case Widget::TouchEventType::BEGAN:
+		m_gameLayer->focusOnPlayer();
+		//m_player->SetDirection(UserPlayer::kLeft);
+		//m_player->getAttacked();
+		m_player->reBound();
+		//m_gameLayer->startMovePlayer();
+		break;
+	case Widget::TouchEventType::MOVED:
+		break;
+
+	case Widget::TouchEventType::ENDED:
+		break;
+
+	case Widget::TouchEventType::CANCELED:
+		//_displayValueLabel->setString("Touch Canceled");
+		break;
+	default:
+		break;
+	}
 }
